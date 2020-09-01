@@ -1,0 +1,115 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+    <title></title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/cart.css" />
+</head>
+
+<body>
+    <div id="container">
+        <!-- ͷ��-->
+        <%- include("./header.html")%>
+        <!-- ����-->
+        <div>
+            <div id="contentTop">
+                <div id="wenzi1">
+                    LITTLE BAG
+                </div>
+                <div id="wenzi2">
+                    购物车
+                </div>
+            </div>
+            <div id="cartProduct">
+                <table>
+                    <thead>
+                        <tr>
+                            <td><input type="checkbox"></td>
+                            <td></td>
+                            <td>商品名字</td>
+                            <td>数量</td>
+                            <td>价格</td>
+                            <td>小计</td>
+                            <td>删除</td>
+                        </tr>
+                    </thead>
+                    <tbody id="tbProduct">
+                        <% for(var i=0;i<productList.length;i++){%>
+                        <tr>
+                            <td><input type="checkbox" id="checkAll" data-sid="<%= productList[i].sid%>"></td>
+                            <td><img src="<%= productList[i].feng%>"></td>
+                            <td><%= productList[i].title%></td>
+                            <td><%= productList[i].num%></td>
+                            <td><%= productList[i].price%></td>
+                            <td class="sub"><%= productList[i].num*productList[i].price%></td>
+                            <td><span class="del" data-rid="<%= productList[i].rid%>">删除</span></td>
+                        </tr>
+                        <%} %>
+
+                    </tbody>
+                </table>
+            </div>
+
+            <hr />
+            <div id="contentBottom">
+                <div id="contentBottomOne">
+                    总计： $ <span id="spanTotal">0</span>
+                </div>
+                <div id="contentBottomTwo">
+                    结算
+                </div>
+            </div>
+        </div>
+
+        <%- include("./footer.html")%>
+    </div>
+    </div>
+    <script type="text/javascript" src="js/javascript.js"></script>
+    <script src="js/jquery.3.4.0.js"></script>
+    <script type="text/javascript">
+        $("#tbProduct").on('change', "input[type='checkbox']", function () {
+            //1、判断选择按钮是选中还是取消
+            //2、获取总金额
+            //3、选中，原来的总金额上加，取消，就是减
+            //4、新的总金额显示在页面上
+            var checked = $(this).prop("checked");
+            var total = Number($("#spanTotal").text());
+            var sub = Number($(this).parent().parent().find(".sub").text());
+            if (checked) {
+                total = total + sub;
+            } else {
+                total = total - sub;
+            }
+            $("#spanTotal").text(total);
+            
+        })
+        // $("#checkAll").click(function(){
+        //     var checked=$(this).prop("checked");
+        //     var checkAll=$("#tbProduct input[type='checkbox']");
+        //     for(var i=0;i<checkAll.length;i++){
+        //         $(checkAll[i].prop('checked',checked));
+        //     }
+        // })
+
+
+        $("#contentBottomTwo").click(function () {
+            var checkedArr = $("#tbProduct input[type='checkbox']:checked")
+            var sid = [];
+            for (var i = 0; i < checkedArr.length; i++) {
+                sid.push($(checkedArr[i]).attr("data-sid"));
+            }
+            var sidstr = sid.join(",");
+            $.ajax({
+                type: "post",
+                url: "/buildOrder",
+                data: "sidstr=" + sidstr + "&total=" + $("#spanTotal").text(),
+                success: function (data) {
+                    alert(data.message);
+                }
+            })
+        })
+    </script>
+</body>
+
+</html>
